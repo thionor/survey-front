@@ -1,0 +1,5 @@
+@mixin answer-block{
+    display: flex;
+    align-items: center;
+    gap: rem(16px);
+}

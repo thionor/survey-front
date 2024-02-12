@@ -5,6 +5,11 @@ const routes = [
     path: '/dashboard',
     name: 'dashboard',
     component: () => import(/* webpackChunkName: "about" */ '../views/admin/Dashboard.vue')
+  },
+  {
+    path: '/surveycreate',
+    name: 'surveycreate',
+    component: () => import(/* webpackChunkName: "about" */ '../views/admin/SurveyCreate.vue')
   }
 ]
 

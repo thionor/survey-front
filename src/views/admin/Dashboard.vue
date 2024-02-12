@@ -1,11 +1,15 @@
 <template>
     <div class="dashboard-view">
-        Dashboard
+        <HeaderAdmin />
     </div>
 </template>
 
 <script>
+    import HeaderAdmin from '@/components/admin/HeaderAdmin.vue';
     export default {
-        name: "Dashboard"
+        name: "Dashboard",
+        components: {
+            HeaderAdmin
+        }
     }
 </script>
