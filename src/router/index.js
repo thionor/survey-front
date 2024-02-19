@@ -2,13 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: () => import(/* webpackChunkName: "about" */ '../views/admin/Dashboard.vue')
-  },
-  {
-    path: '/surveycreate',
-    name: 'surveycreate',
+    path: '/survey/create',
+    name: 'surveyCreate',
     component: () => import(/* webpackChunkName: "about" */ '../views/admin/SurveyCreate.vue')
   }
 ]
