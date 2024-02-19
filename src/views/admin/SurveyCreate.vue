@@ -16,6 +16,7 @@
             <QuestionBlock :ref="`questionBlock_${index}`" @questionBlockRendered="focusLastQuestionTitle"
                 :questionIndex="index" :question="question" />
             <div class="d-flex d-flex--end">
+                <Toggle label="Obrigatório" :questionIndex="index" />
                 <ClipboardDocumentIcon class="icon icon--cursor" @click="duplicateQuestion(index)"/>
                 <TrashIcon class="icon icon--cursor" @click="removeQuestion(index)"/>
             </div>
@@ -31,12 +32,14 @@
 import Header from '@/components/admin/Header.vue';
 import QuestionBlock from '@/components/admin/QuestionBlock.vue';
 import { TrashIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline';
+import Toggle from '@/components/common/Toggle.vue'
 export default {
     components: {
         QuestionBlock,
         Header,
         TrashIcon,
-        ClipboardDocumentIcon
+        ClipboardDocumentIcon,
+        Toggle
     },
     methods: {
         addNewQuestion(question = null) {
@@ -50,6 +53,7 @@ export default {
             const newQuestion = {
                 title: 'Pergunta ' + (parseInt(this.$store.state.survey.survey.questions.length) + 1),
                 type: 'radio',
+                required: false,
                 answers: [
                     {
                         title: 'Opção 1'
