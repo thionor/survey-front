@@ -1,15 +1,58 @@
 const state = {
     survey: {
-        title: 'Untitled survey',
-        description: 'Untitled survey description',
+        title: 'Pesquisa sem título',
+        description: 'Pesquisa sem descrição...',
         draggedAnswerIndex: null,
         questions: [
+            {
+                
+            }
         ]
-    }
-
+    },
+    usersResponse: [
+        {
+            user: {
+                id: 1,
+                email: 'thiago.silva@stefanini.com'
+            },
+            surveyId: 1,
+            responses: [
+                {questionId: 1, answerId: 1},
+                {questionId: 2, answerIds: [4,5]},
+                {questionId: 3, answerText: "Minha resposta de texto"}
+            ]
+        },
+        {
+            user: {
+                id: 2,
+                email: 'maria.luiza@stefanini.com'
+            },
+            surveyId: 1,
+            responses: [
+                {questionId: 1, answerId: 2},
+                {questionId: 2, answerIds: [4]},
+                {questionId: 3, answerText: "Minha resposta de texto 2"}
+            ]
+        },
+        {
+            user: {
+                id: 3,
+                email: 'devid.santos@stefanini.com'
+            },
+            surveyId: 1,
+            responses: [
+                {questionId: 1, answerId: 2},
+                {questionId: 2, answerIds: [5]},
+                {questionId: 3, answerText: "Minha resposta de texto 2"}
+            ]
+        }
+    ]
 }
 
 const mutations = {
+    addSurvey(state, newSurvey) {
+        state.survey = newSurvey;
+    },
     addQuestion(state, newQuestion) {
         state.survey.questions.push(newQuestion)
     },

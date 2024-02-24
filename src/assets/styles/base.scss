@@ -10,11 +10,12 @@
 
 // Body
 body {
+  position: relative;
   font-family: $font-family;
   font-weight: 400;
   line-height: 1.6;
   color: $color-black;
-  background-color: $color-white;
+  background-color: $color-white-200;
 }
 
 // Headers
@@ -29,9 +30,6 @@ h1, h2, h3, h4, h5, h6 {
 a {
   color: $color-primary;
   text-decoration: none;
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 // Buttons
@@ -45,9 +43,10 @@ a {
   cursor: pointer;
   border: none;
   border-radius: rem(8px);
-  transition: background-color 0.3s;
+  transition: .3s;
+  text-wrap: nowrap;
   &:hover {
-    background-color: darken($color-primary, 10%);
+    opacity: .7;
   }
 
   &--secundary {
@@ -55,6 +54,19 @@ a {
     &:hover {
       background-color: darken($color-secondary, 10%);
     }
+  }
+  &--outline {
+    border: 1px solid $color-primary;
+    background-color: transparent;
+    color: $color-primary;
+  }
+
+  &--error {
+    background-color: $color-error;
+  }
+
+  &--icon {
+    padding: rem(5px) 0 !important;
   }
 }
 
@@ -91,7 +103,7 @@ textarea {
 .input-control:focus, .input-control:hover {
   cursor:  text;
   border: 1px solid $color-gray-100;
-  background-color: $color-white;
+  background-color: $color-white-200;
 }
 
 // Grid System (Optional)
@@ -130,6 +142,7 @@ textarea {
 .d-flex {
   display: flex;
   align-items: center;
+  gap: rem(16px);
 
   &--sb {
     justify-content: space-between;
@@ -139,12 +152,24 @@ textarea {
     justify-content: flex-end;
     align-items: flex-end;
   }
+
+  &--ac {
+    align-items: center;
+  }
+
+  &--jc {
+    justify-content: center;
+  }
+
+  &--fd-c {
+    flex-direction: column;
+  }
 }
 
 
 //Common classes
 .page-view__wrapper {
-  background-color: $color-white-200;
+  background-color: $color-white;
   border-radius: rem(8px);
 }
 
@@ -176,6 +201,10 @@ textarea {
   margin-top: rem(20px);
   margin-bottom: rem(20px);
 }
+.margin-lg {
+  margin-top: rem(50px);
+  margin-bottom: rem(50px);
+}
 .padding-md {
   padding: rem(50px);
 }
@@ -194,6 +223,13 @@ textarea {
 .icon {
   width: rem(25px);
   height: rem(25px);
+
+  &.icon--error {
+    color: $color-error;
+  }
+  &.icon--primary {
+    color: $color-primary;
+  }
 }
 
 .icon.icon--cursor {
@@ -201,4 +237,19 @@ textarea {
   &:hover {
     opacity: .7;
   }
+
+  .icon.icon--sm {
+    width: rem(20px);
+    height: rem(20px);
+  }
+}
+
+//Background-colors
+.bg--white {
+  background-color: $color-white;
+}
+
+//Border
+.border--radius {
+  border-radius: rem(8px);
 }

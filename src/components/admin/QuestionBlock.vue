@@ -1,27 +1,28 @@
 <template>
     <div class="cmp-question">
         <div class="cmp-question__header">
-            <input ref="questionTitle" class="input-control input-control--regular" type="text" :value="question.title"
-                @input="changeQuestionTitleEvent">
-            <select name="questionTypeSelected" v-model="typeSelected" @change="changeQuestionTypeEvent()">
+            <input ref="questionTitle" class="input-control input-control--regular" type="text" :disabled="isResponse"
+                :value="question.title" @input="changeQuestionTitleEvent">
+            <select name="questionTypeSelected" v-model="typeSelected" v-if="!isResponse"
+                @change="changeQuestionTypeEvent()">
                 <option selected value="radio">Unica escolha</option>
                 <option value="checkbox">Multipla escolha</option>
                 <option value="text">Campo livre</option>
             </select>
         </div>
         <ul class="cmp-question__answer-list">
-            <li class="cmp-question__answer-item d-flex d-flex--sb" v-for="(answer, index) in question.answers" :key="index" :draggable="true"
-                @dragstart="handleDragStart(index)" @dragover="handleDragOver" @drop="handleDrop" @dragend="handleDragEnd"
-                @dragenter="handleDragEnter" @dragleave="handleDragLeave"
+            <li class="cmp-question__answer-item d-flex d-flex--sb" :disabled="isResponse" v-for="(answer, index) in question.answers" :key="index"
+                :draggable="!isResponse" @dragstart="handleDragStart(index)" @dragover="handleDragOver" @drop="handleDrop"
+                @dragend="handleDragEnd" @dragenter="handleDragEnter" @dragleave="handleDragLeave"
                 :class="{ 'drag-over': index === $store.state.survey.survey.draggedAnswerIndex }" :data-index="index">
                 <AnswerBlock :ref="`answerBlock_${index}`" @answerBlockRendered="focusLastAnswerTitle"
                     :required="question.required" :questionType="question.type" :answer="answer"
-                    :questionIndex="questionIndex" :answerIndex="index"></AnswerBlock>
-               
-                <TrashIcon v-if="question.type !== 'text'" @click="removeAnswer(index)" class="icon icon--cursor"/>
+                    :questionIndex="questionIndex" :questionId="question.id" :answerIndex="index" :isResponse="isResponse"></AnswerBlock>
+
+                <TrashIcon v-if="question.type !== 'text' && !isResponse" @click="removeAnswer(index)" class="icon icon--cursor" />
             </li>
         </ul>
-        <button v-if="question.type !== 'text'" class="button" @click="addNewAnswer">Adicionar Resposta</button>
+        <button v-if="question.type !== 'text' && !isResponse" class="button" @click="addNewAnswer">Adicionar Resposta</button>
     </div>
 </template>
 
@@ -31,7 +32,8 @@ import { TrashIcon } from '@heroicons/vue/24/outline';
 export default {
     props: {
         question: Object,
-        questionIndex: Number
+        questionIndex: Number,
+        isResponse: Boolean
     },
     components: {
         AnswerBlock,
@@ -141,7 +143,7 @@ export default {
     }
 
     &__answer-item[draggable="true"]:hover {
-        background-color: $color-white-200;
+        background-color: $color-white;
     }
 
     &__answer-item[draggable="true"].drag-over {
@@ -162,7 +164,7 @@ export default {
             height: rem(50px);
             font-size: rem(18px);
             outline: none;
-            background-color: $color-white;
+            background-color: $color-white-200;
             padding: 0 rem(16px);
             border-radius: rem(8px);
         }
@@ -189,7 +191,7 @@ export default {
 
             &:focus {
                 border-bottom: 1px solid $color-black;
-                background-color: $color-white;
+                background-color: $color-white-200;
             }
         }
 

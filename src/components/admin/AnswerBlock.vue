@@ -1,7 +1,7 @@
 <template>
-    <div class="cmp-answer">
+    <div class="cmp-answer" :class="isResponse ? 'cmp-answer--response' : ''">
         <input :type="questionType" ref="answerTitle" name="answer" :placeholder="questionType === 'text' ? 'Texto de resposta curta' : ''" disabled>
-        <input v-if="questionType !== 'text'" type="text" :value="answer.title" @input="changeAnswerTitleEvent">
+        <input v-if="questionType !== 'text'" type="text" :value="answer.title" @input="changeAnswerTitleEvent" :disabled="isResponse">
     </div>
 </template>
 
@@ -12,7 +12,8 @@ export default {
         questionType: String,
         required: Boolean,
         questionIndex: Number,
-        answerIndex: Number
+        answerIndex: Number,
+        isResponse: Boolean
     },
     methods: {
         changeAnswerTitleEvent(event) {
@@ -37,5 +38,11 @@ export default {
         width: 100%;
         height: rem(50px);
         gap: rem(16px);
+    }
+
+    .cmp-answer--response {
+        input:disabled {
+            background-color: unset;
+        }
     }
 </style>
