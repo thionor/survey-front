@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { updateAnswer } from '@/service/apiService';
 export default {
     props: {
         answer: Object,
@@ -13,9 +14,24 @@ export default {
         required: Boolean,
         questionIndex: Number,
         answerIndex: Number,
-        isResponse: Boolean
+        isResponse: Boolean,
+        question: Object
+    },
+    data() {
+        return {
+            saveAnswerTimeout: null
+        }
     },
     methods: {
+        handleSaveAnswer() {
+            clearTimeout(this.saveAnswerTimeout);
+            this.saveAnswerTimeout = setTimeout(() => {
+                if(this.answer.id) {
+                    this.updateAnswer();
+                }
+            }, 1000);
+        },
+
         changeAnswerTitleEvent(event) {
             const payload = {
                 questionIndex: this.questionIndex,
@@ -23,6 +39,14 @@ export default {
                 newTitle: event.target.value
             }
             this.$store.commit('survey/changeAnswerTitle', payload);
+            this.handleSaveAnswer();
+        },
+        updateAnswer() {
+            updateAnswer(this.answer.title, this.question.id, this.answer.id).then((data) => {
+                console.log(data.data);
+            }).catch((error) => {
+                console.log(error);
+            });
         }
     },
     mounted() {

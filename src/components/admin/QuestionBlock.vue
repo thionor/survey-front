@@ -3,57 +3,97 @@
         <div class="cmp-question__header">
             <input ref="questionTitle" class="input-control input-control--regular" type="text" :disabled="isResponse"
                 :value="question.title" @input="changeQuestionTitleEvent">
-            <select name="questionTypeSelected" v-model="typeSelected" v-if="!isResponse"
-                @change="changeQuestionTypeEvent()">
-                <option selected value="radio">Unica escolha</option>
+            <select name="questionTypeSelected" v-model="typeSelected" v-if="!isResponse" @change="changeQuestionTypeEvent">
+                <option value="radio">Unica escolha</option>
                 <option value="checkbox">Multipla escolha</option>
                 <option value="text">Campo livre</option>
             </select>
         </div>
         <ul class="cmp-question__answer-list">
-            <li class="cmp-question__answer-item d-flex d-flex--sb" :disabled="isResponse" v-for="(answer, index) in question.answers" :key="index"
-                :draggable="!isResponse" @dragstart="handleDragStart(index)" @dragover="handleDragOver" @drop="handleDrop"
-                @dragend="handleDragEnd" @dragenter="handleDragEnter" @dragleave="handleDragLeave"
+            <li class="cmp-question__answer-item d-flex d-flex--sb" :disabled="isResponse"
+                v-for="(answer, index) in question.answers" :key="index" :draggable="!isResponse"
+                @dragstart="handleDragStart(index)" @dragover="handleDragOver" @drop="handleDrop" @dragend="handleDragEnd"
+                @dragenter="handleDragEnter" @dragleave="handleDragLeave"
                 :class="{ 'drag-over': index === $store.state.survey.survey.draggedAnswerIndex }" :data-index="index">
                 <AnswerBlock :ref="`answerBlock_${index}`" @answerBlockRendered="focusLastAnswerTitle"
                     :required="question.required" :questionType="question.type" :answer="answer"
-                    :questionIndex="questionIndex" :questionId="question.id" :answerIndex="index" :isResponse="isResponse"></AnswerBlock>
+                    :questionIndex="questionIndex" :questionId="question.id" :question="question" :answerIndex="index"
+                    :isResponse="isResponse">
+                </AnswerBlock>
 
-                <TrashIcon v-if="question.type !== 'text' && !isResponse" @click="removeAnswer(index)" class="icon icon--cursor" />
+                <TrashIcon v-if="question.type !== 'text' && !isResponse" @click="removeAnswer(index)"
+                    class="icon icon--cursor" />
             </li>
         </ul>
-        <button v-if="question.type !== 'text' && !isResponse" class="button" @click="addNewAnswer">Adicionar Resposta</button>
+        <button v-if="question.type !== 'text' && !isResponse" class="button" @click="addNewAnswer">Adicionar
+            Resposta</button>
     </div>
 </template>
 
 <script>
 import AnswerBlock from '@/components/admin/AnswerBlock.vue'
 import { TrashIcon } from '@heroicons/vue/24/outline';
+import { updateQuestion, addAnswer } from '@/service/apiService';
 export default {
     props: {
         question: Object,
         questionIndex: Number,
-        isResponse: Boolean
+        isResponse: Boolean,
+        response: Object,
+        surveyId: Number
     },
     components: {
         AnswerBlock,
         TrashIcon
     },
+    computed: {
+        typeSelected: {
+            get() {
+                return this.question.type || 'radio';
+            },
+            set(value) {
+                this.$store.commit('survey/changeQuestionType', {
+                    questionIndex: this.questionIndex,
+                    newType: value
+                });
+            }
+        }
+    },
     data() {
         return {
-            typeSelected: 'radio',
-            newTitle: ''
+            newTitle: '',
+            saveQuestionTimeout: null
         }
     },
     methods: {
+        handleSaveQuestion() {
+            clearTimeout(this.saveQuestionTimeout);
+            this.saveQuestionTimeout = setTimeout(() => {
+                if (this.question.id) {
+                    this.updateQuestion();
+                }
+            }, 1000)
+        },
         addNewAnswer() {
-            const newAnswer = { title: 'Opção ' + (parseInt(this.$store.state.survey.survey.questions[this.questionIndex].answers.length) + 1) };
+            let newAnswer = { title: 'Opção ' + (parseInt(this.$store.state.survey.survey.questions[this.questionIndex].answers.length) + 1) };
             const index = this.questionIndex;
-            const payload = {
-                questionIndex: index,
-                newAnswer: newAnswer
-            }
-            this.$store.commit('survey/addAnswer', payload)
+            addAnswer(newAnswer.title, this.question.id).then((data) => {
+               newAnswer.id = data.data.id;
+                const payload = {
+                    questionIndex: index,
+                    newAnswer: newAnswer
+                }
+                this.$store.commit('survey/addAnswer', payload)
+            }).catch((error) => {
+                console.log(error)
+            })
+        },
+        updateQuestion() {
+            updateQuestion(this.question.title, this.question.type, this.question.id, this.surveyId).then((data) => {
+                console.log(data);
+            }).catch((error) => {
+                console.log(error)
+            })
         },
         removeAnswer(index) {
             const payload = {
@@ -63,12 +103,13 @@ export default {
             this.$store.commit("survey/removeAnswer", payload);
         },
         changeQuestionTypeEvent() {
+            console.log('Selected Type:', this.typeSelected);
             const payload = {
                 questionIndex: this.questionIndex,
                 newType: this.typeSelected
-            }
+            };
             this.$store.commit('survey/changeQuestionType', payload);
-            this.deleteAllAnswersEvent();
+            this.handleSaveQuestion();
         },
         deleteAllAnswersEvent() {
             this.$store.commit('survey/deleteAllAnswers', this.questionIndex);
@@ -79,9 +120,9 @@ export default {
                 newTitle: event.target.value
             }
             this.$store.commit('survey/changeQuestionTitle', payload);
+            this.handleSaveQuestion();
         },
         handleDragStart(index) {
-            console.log('Drag start', index);
             this.$store.commit('survey/setDraggedAnswerIndex', index);
         },
         handleDragOver(event) {
@@ -91,7 +132,6 @@ export default {
             event.preventDefault();
             const draggedIndex = this.$store.state.survey.survey.draggedAnswerIndex;
             const droppedIndex = parseInt(event.currentTarget.dataset.index, 10);
-            console.log('Dropped', draggedIndex, droppedIndex);
             this.$store.commit('survey/reorderAnswers', {
                 questionIndex: this.questionIndex,
                 draggedIndex,
@@ -109,16 +149,10 @@ export default {
             event.currentTarget.classList.remove('drag-over');
         },
         focusLastAnswerTitle() {
-            // Obter o índice da última pergunta adicionada
             const lastIndex = this.$store.state.survey.survey.questions[this.questionIndex].answers.length - 1;
-
-            // Defina um timeout maior para garantir que o componente foi renderizado antes de tentar focar
             setTimeout(() => {
-                // Acesse a referência da última pergunta
                 const answerBlockRef = this.$refs[`answerBlock_${lastIndex}`];
-                console.log(answerBlockRef)
                 if (answerBlockRef && answerBlockRef.length > 0) {
-                    // Iterar sobre os elementos do array answerBlockRefs
                     answerBlockRef.forEach(answerBlockRef => {
                         if (answerBlockRef.$refs && answerBlockRef.$refs.answerTitle) {
                             answerBlockRef.$refs.answerTitle.focus();
@@ -128,7 +162,7 @@ export default {
             }, 100);
         }
     },
-    mounted() {
+    created() {
         this.$emit('questionBlockRendered');
     }
 }

@@ -1,7 +1,7 @@
 const state = {
     survey: {
-        title: 'Pesquisa sem título',
-        description: 'Pesquisa sem descrição...',
+        title: '',
+        description: '',
         draggedAnswerIndex: null,
         questions: [
             {
@@ -9,6 +9,7 @@ const state = {
             }
         ]
     },
+    loaded: false,
     usersResponse: [
         {
             user: {
@@ -52,6 +53,13 @@ const state = {
 const mutations = {
     addSurvey(state, newSurvey) {
         state.survey = newSurvey;
+        state.loaded = true;
+    },
+    changeSurveyTitle(state, newTitle) {
+        state.survey.title = newTitle;
+    },
+    changeSurveyDescription(state, newDesc) {
+        state.survey.description = newDesc;
     },
     addQuestion(state, newQuestion) {
         state.survey.questions.push(newQuestion)
@@ -70,6 +78,13 @@ const mutations = {
     },
     addAnswer(state, { questionIndex, newAnswer }) {
         state.survey.questions[questionIndex].answers.push(newAnswer);
+    },
+    addAnswerByQuestionId(state, { questionId, answerId }) {
+        const question = state.survey.questions.find(question => question.id === questionId);
+    
+        if (question && question.answers.length > 0) {
+            question.answers[0].id = answerId;
+        }
     },
     removeAnswer(state, {questionIndex, answerIndex}) {
         state.survey.questions[questionIndex].answers.splice(answerIndex, 1);
